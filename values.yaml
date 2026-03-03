@@ -133,6 +133,26 @@ externalSecrets:
     postgresCredentialsRef:
       key: readarr-postgresql-credentials
       property: password
+    postgresUser: postgres
+    postgresPort: "5432"
+    postgresHost: postgresql-rw.postgresql.svc.cluster.local
+    postgresMainDb: readarr-main
+    postgresLogDb: readarr-log
+    options:
+      logLevel: Info
+      port: "8787"
+      urlBase: ""
+      bindAddress: "*"
+      sslPort: "8787"
+      enableSsl: "False"
+      authenticationMethod: Basic
+      branch: nightly
+      launchBrowser: "False"
+      updateMechanism: Docker
+      analyticsEnabled: "False"
+      updateAutomatically: "True"
+      instanceName: Readarr
+    # additionalOptions: {} # map of extra <Key>Value</Key> elements to append into config.xml
 
 onepassworditem:
   enabled: true
