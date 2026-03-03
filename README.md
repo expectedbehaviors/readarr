@@ -24,10 +24,9 @@ When using `postgresqlOperator`, set `postgresqlOperator.bootstrap.existingSecre
 
 When `externalSecrets.enabled: true`, the chart creates an ExternalSecret that syncs `config.xml` from 1Password.
 
-- `externalSecrets.configXml.databaseMode` supports `auto`, `sqlite`, `postgres`, `external-postgres`.
-- In `auto`, Postgres tags are rendered only when Bitnami/PostgresOperator is enabled or an explicit `postgresHost` is provided.
-- In `sqlite`, all Postgres tags are omitted from `config.xml`.
-- Use `externalSecrets.configXml.enablePostgres` as an explicit override switch.
+- `externalSecrets.configXml.postgres.method` supports `bitnami`, `operator`, `external`, `sqlite`.
+- The selected method is the single source of truth for Postgres rendering in config.xml.
+- In `sqlite` mode, all `<Postgres*>` tags are omitted from `config.xml`.
 
 ## Key values
 

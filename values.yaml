@@ -130,17 +130,16 @@ externalSecrets:
     apiKeyRef:
       key: readarr
       property: api_key
-    postgresCredentialsRef:
-      key: readarr-postgresql-credentials
-      property: password
-    # Database mode for config.xml Postgres block: auto|sqlite|postgres|external-postgres
-    databaseMode: auto
-    enablePostgres: true
-    postgresUser: postgres
-    postgresPort: "5432"
-    postgresHost: ""
-    postgresMainDb: readarr-main
-    postgresLogDb: readarr-log
+    postgres:
+      method: bitnami
+      user: postgres
+      port: "5432"
+      host: ""
+      mainDb: readarr-main
+      logDb: readarr-log
+      credentialsRef:
+        key: readarr-postgresql-credentials
+        property: password
     options:
       logLevel: Info
       port: "8787"
