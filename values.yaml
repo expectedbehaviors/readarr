@@ -1,5 +1,6 @@
 # Baseline Readarr. Override ingress host, persistence (existingClaim), postgresql (existingSecret), onepassworditem.items in your values.
-# PostgreSQL: use embedded Bitnami (postgresql.enabled, default) or CloudNativePG operator (postgresqlOperator.enabled).
+# Database mode for config.xml rendering is externalSecrets.configXml.database.
+# Defaults to sqlite (no Postgres block in config.xml) unless explicitly set.
 postgresqlOperator:
   enabled: false
   clusterName: readarr-postgresql
@@ -15,6 +16,8 @@ readarr:
   controllers:
     main:
       enabled: true
+      annotations:
+        argocd.argoproj.io/sync-wave: "1"
       defaultContainerOptions:
         image:
           repository: linuxserver/readarr
@@ -104,7 +107,7 @@ readarr:
         - path: /downloads
 
 postgresql:
-  enabled: true
+  enabled: false
   architecture: standalone
   auth:
     database: readarr-main
@@ -130,8 +133,8 @@ externalSecrets:
     apiKeyRef:
       key: readarr
       property: api_key
+    database: sqlite # sqlite|bitnami|operator|external
     postgres:
-      method: bitnami
       user: postgres
       port: "5432"
       host: ""

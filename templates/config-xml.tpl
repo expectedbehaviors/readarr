@@ -1,9 +1,9 @@
-{{- define "readarr_config_xml_content" -}}
+{{- define "readarrConfigXmlContent" -}}
 {{- $configXmlValues := .Values.externalSecrets.configXml | default dict }}
 {{- $configOptions := $configXmlValues.options | default dict }}
 {{- $postgresConfig := $configXmlValues.postgres | default dict }}
-{{- $postgresMethod := lower ($postgresConfig.method | default "bitnami") }}
-{{- $postgresqlBlockEnabled := ne $postgresMethod "sqlite" }}
+{{- $databaseMode := lower ($configXmlValues.database | default ($postgresConfig.method | default "sqlite")) }}
+{{- $postgresqlBlockEnabled := ne $databaseMode "sqlite" }}
 <Config>
   <LogLevel>{{ $configOptions.logLevel | default "Info" }}</LogLevel>
   <Port>{{ $configOptions.port | default "8787" }}</Port>
@@ -21,10 +21,10 @@
   <InstanceName>{{ $configOptions.instanceName | default "Readarr" }}</InstanceName>
   {{- if $postgresqlBlockEnabled }}
   {{- $postgresDefaultHost := printf "%s-postgresql.%s.svc.cluster.local" .Release.Name .Release.Namespace }}
-  {{- if eq $postgresMethod "operator" }}
+  {{- if eq $databaseMode "operator" }}
     {{- $postgresDefaultHost = printf "%s-rw.%s.svc.cluster.local" .Values.postgresqlOperator.clusterName .Release.Namespace }}
-  {{- else if eq $postgresMethod "external" }}
-    {{- $postgresDefaultHost = required "externalSecrets.configXml.postgres.host is required when postgres.method=external" $postgresConfig.host }}
+  {{- else if eq $databaseMode "external" }}
+    {{- $postgresDefaultHost = required "externalSecrets.configXml.postgres.host is required when database=external" $postgresConfig.host }}
   {{- end }}
   <PostgresUser>{{ $postgresConfig.user | default "postgres" }}</PostgresUser>
   <PostgresPassword>__POSTGRES_PASSWORD__</PostgresPassword>
@@ -33,8 +33,8 @@
   <PostgresMainDb>{{ $postgresConfig.mainDb | default "readarr-main" }}</PostgresMainDb>
   <PostgresLogDb>{{ $postgresConfig.logDb | default "readarr-log" }}</PostgresLogDb>
   {{- end }}
-{{- range $k, $v := $configXmlValues.additionalOptions }}
-  <{{ $k }}>{{ $v }}</{{ $k }}>
+{{- range $optionName, $optionValue := $configXmlValues.additionalOptions }}
+  <{{ $optionName }}>{{ $optionValue }}</{{ $optionName }}>
 {{- end }}
 </Config>
 {{- end -}}

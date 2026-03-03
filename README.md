@@ -14,9 +14,10 @@ Baseline Helm chart for [Readarr](https://readarr.com) (books/audiobooks manager
 
 | Option | Toggle | Default | Description |
 |--------|--------|---------|-------------|
-| **Bitnami PostgreSQL** | `postgresql.enabled` | `true` | Embedded Bitnami subchart. Set `false` when using operator or external DB. |
+| **DB mode selector** | `externalSecrets.configXml.database` | `sqlite` | `sqlite|bitnami|operator|external` controls Postgres fields in `config.xml`. |
+| **Bitnami PostgreSQL** | `postgresql.enabled` | `false` | Embedded Bitnami subchart. Set `true` when using `database: bitnami`. |
 | **CloudNativePG operator** | `postgresqlOperator.enabled` | `false` | Creates a `PostgresCluster` CRD. Requires CloudNativePG operator. Set `postgresql.enabled: false` when enabled. |
-| **External DB** | Both `false` | — | Use `externalSecrets.configXml.postgresHost` (and credentials) to point at your own PostgreSQL. |
+| **External DB** | `externalSecrets.configXml.database=external` | — | Set `externalSecrets.configXml.postgres.host` and credentials ref. |
 
 When using `postgresqlOperator`, set `postgresqlOperator.bootstrap.existingSecret` to a Secret with `password` key. The cluster service will be `{{ postgresqlOperator.clusterName }}-rw.{{ Release.Namespace }}.svc.cluster.local`.
 
@@ -24,8 +25,8 @@ When using `postgresqlOperator`, set `postgresqlOperator.bootstrap.existingSecre
 
 When `externalSecrets.enabled: true`, the chart creates an ExternalSecret that syncs `config.xml` from 1Password.
 
-- `externalSecrets.configXml.postgres.method` supports `bitnami`, `operator`, `external`, `sqlite`.
-- The selected method is the single source of truth for Postgres rendering in config.xml.
+- `externalSecrets.configXml.database` supports `bitnami`, `operator`, `external`, `sqlite`.
+- The selected mode is the single source of truth for Postgres rendering in config.xml.
 - In `sqlite` mode, all `<Postgres*>` tags are omitted from `config.xml`.
 
 ## Key values
@@ -60,6 +61,7 @@ helm dependency update . && helm template readarr . -f values.yaml -n readarr
 ## Argo CD
 
 Point your Application at this repo (path: `.`) and pass your values. Namespace typically `readarr`.
+This chart sets pre-workload resources to earlier sync waves (`ExternalSecret: -2`, `PostgresCluster: -1`, workload controller: `1`) so secrets/config inputs apply before pod resources.
 
 ## Recommended resources
 

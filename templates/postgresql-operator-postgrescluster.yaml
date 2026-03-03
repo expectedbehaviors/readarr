@@ -1,4 +1,7 @@
-{{- if .Values.postgresqlOperator.enabled }}
+{{- $configXmlValues := .Values.externalSecrets.configXml | default dict }}
+{{- $postgresConfig := $configXmlValues.postgres | default dict }}
+{{- $databaseMode := lower ($configXmlValues.database | default ($postgresConfig.method | default "sqlite")) }}
+{{- if or .Values.postgresqlOperator.enabled (eq $databaseMode "operator") }}
 # CloudNativePG PostgresCluster. Set postgresql.enabled: false when using this.
 apiVersion: postgresql.cnpg.io/v1
 kind: Cluster
@@ -8,6 +11,8 @@ metadata:
   labels:
     app.kubernetes.io/name: {{ .Chart.Name }}
     app.kubernetes.io/instance: {{ .Release.Name }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"
 spec:
   instances: {{ .Values.postgresqlOperator.instances }}
   bootstrap:
