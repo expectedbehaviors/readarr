@@ -1,0 +1,113 @@
+# Baseline Readarr. Override ingress host, persistence (existingClaim), postgresql (existingSecret), onepassworditem.items in your values.
+readarr:
+  global:
+    fullnameOverride: readarr
+  controllers:
+    main:
+      enabled: true
+      defaultContainerOptions:
+        image:
+          repository: linuxserver/readarr
+          tag: nightly
+          pullPolicy: Always
+      containers:
+        main:
+          env:
+            DOCKER_MODS: ghcr.io/themepark-dev/theme.park:readarr
+            PGID: "1000"
+            PUID: "1000"
+            TP_ADDON: readarr-alt-logo
+            TP_HOTIO: "false"
+            TP_SCHEME: HTTPS
+            TP_THEME: aquamarine
+            TZ: UTC
+            UMASK: "2"
+          probes:
+            startup:
+              enabled: true
+              custom: true
+              spec:
+                failureThreshold: 90
+                periodSeconds: 5
+                successThreshold: 1
+                tcpSocket:
+                  port: 8787
+                timeoutSeconds: 1
+                initialDelaySeconds: 60
+          resources:
+            requests:
+              cpu: 250m
+              memory: 1Gi
+          securityContext:
+            allowPrivilegeEscalation: true
+            privileged: true
+            readOnlyRootFilesystem: false
+            runAsGroup: 0
+            runAsNonRoot: false
+            runAsUser: 0
+  defaultPodOptions:
+    securityContext:
+      fsGroup: 1000
+      fsGroupChangePolicy: "Always"
+  service:
+    main:
+      enabled: true
+      ports:
+        http:
+          enabled: true
+          port: 8787
+          protocol: HTTP
+  ingress:
+    main:
+      enabled: true
+      annotations: {}
+      hosts:
+        - host: readarr.example.com
+          paths:
+            - path: /
+              pathType: Prefix
+      tls:
+        - hosts:
+            - readarr.example.com
+          secretName: readarr-tls
+  persistence:
+    readarr-secrets:
+      enabled: true
+      type: secret
+      name: readarr
+      globalMounts:
+        - path: /config/config.xml
+          subPath: config.xml
+        - path: /custom-cont-init.d/scripts_init.bash
+          subPath: scripts_init.bash
+        - path: /config/extended.conf
+          subPath: extended.conf
+    custom-services:
+      enabled: true
+      type: emptyDir
+      globalMounts:
+        - path: /custom-services.d
+    downloads:
+      enabled: true
+      type: emptyDir
+      globalMounts:
+        - path: /downloads
+
+postgresql:
+  architecture: standalone
+  auth:
+    database: readarr-main
+    password: changeme
+  primary:
+    persistence:
+      enabled: true
+      size: 5Gi
+    name: readarr-main
+    resources:
+      requests:
+        cpu: "1"
+        memory: 2Gi
+
+onepassworditem:
+  enabled: true
+  items: []
