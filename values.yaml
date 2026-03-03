@@ -133,9 +133,12 @@ externalSecrets:
     postgresCredentialsRef:
       key: readarr-postgresql-credentials
       property: password
+    # Database mode for config.xml Postgres block: auto|sqlite|postgres|external-postgres
+    databaseMode: auto
+    enablePostgres: true
     postgresUser: postgres
     postgresPort: "5432"
-    postgresHost: postgresql-rw.postgresql.svc.cluster.local
+    postgresHost: ""
     postgresMainDb: readarr-main
     postgresLogDb: readarr-log
     options:

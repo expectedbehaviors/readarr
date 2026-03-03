@@ -22,7 +22,12 @@ When using `postgresqlOperator`, set `postgresqlOperator.bootstrap.existingSecre
 
 ## ExternalSecrets (config.xml)
 
-When `externalSecrets.enabled: true`, the chart creates an ExternalSecret that syncs `config.xml` from 1Password (api_key + postgres credentials). Override `externalSecrets.configXml.postgresHost` when using postgresqlOperator or external cluster.
+When `externalSecrets.enabled: true`, the chart creates an ExternalSecret that syncs `config.xml` from 1Password.
+
+- `externalSecrets.configXml.databaseMode` supports `auto`, `sqlite`, `postgres`, `external-postgres`.
+- In `auto`, Postgres tags are rendered only when Bitnami/PostgresOperator is enabled or an explicit `postgresHost` is provided.
+- In `sqlite`, all Postgres tags are omitted from `config.xml`.
+- Use `externalSecrets.configXml.enablePostgres` as an explicit override switch.
 
 ## Key values
 
@@ -56,3 +61,10 @@ helm dependency update . && helm template readarr . -f values.yaml -n readarr
 ## Argo CD
 
 Point your Application at this repo (path: `.`) and pass your values. Namespace typically `readarr`.
+
+## Recommended resources
+
+- **Official docs:** https://readarr.com/
+- **Servarr wiki:** https://wiki.servarr.com/readarr
+- **TRaSH Guides (ecosystem):** https://trash-guides.info/
+- **Recyclarr docs:** https://recyclarr.dev/wiki/
