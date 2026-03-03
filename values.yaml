@@ -1,4 +1,14 @@
 # Baseline Readarr. Override ingress host, persistence (existingClaim), postgresql (existingSecret), onepassworditem.items in your values.
+# PostgreSQL: use embedded Bitnami (postgresql.enabled, default) or CloudNativePG operator (postgresqlOperator.enabled).
+postgresqlOperator:
+  enabled: false
+  clusterName: readarr-postgresql
+  instances: 1
+  storageSize: 5Gi
+  storageClass: ""
+  bootstrap:
+    existingSecret: ""
+
 readarr:
   global:
     fullnameOverride: readarr
@@ -94,6 +104,7 @@ readarr:
         - path: /downloads
 
 postgresql:
+  enabled: true
   architecture: standalone
   auth:
     database: readarr-main
@@ -107,6 +118,21 @@ postgresql:
       requests:
         cpu: "1"
         memory: 2Gi
+
+externalSecrets:
+  enabled: false
+  refreshInterval: 1h
+  secretStoreRef:
+    name: onepassword-connect
+    kind: ClusterSecretStore
+  configXml:
+    secretName: readarr
+    apiKeyRef:
+      key: readarr
+      property: api_key
+    postgresCredentialsRef:
+      key: readarr-postgresql-credentials
+      property: password
 
 onepassworditem:
   enabled: true
