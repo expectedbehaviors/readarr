@@ -27,7 +27,9 @@ When `externalSecrets.enabled: true`, the chart creates an ExternalSecret that s
 
 - `externalSecrets.configXml.database` supports `bitnami`, `operator`, `external`, `sqlite`.
 - The selected mode is the single source of truth for Postgres rendering in config.xml.
+- If `database` is omitted, templates fall back to legacy `externalSecrets.configXml.postgres.method` for backward compatibility.
 - In `sqlite` mode, all `<Postgres*>` tags are omitted from `config.xml`.
+- Charts fail render for invalid/ambiguous DB combinations (for example `database=bitnami` while `postgresql.enabled=false`).
 
 ## Key values
 
@@ -62,6 +64,10 @@ helm dependency update . && helm template readarr . -f values.yaml -n readarr
 
 Point your Application at this repo (path: `.`) and pass your values. Namespace typically `readarr`.
 This chart sets pre-workload resources to earlier sync waves (`ExternalSecret: -2`, `PostgresCluster: -1`, workload controller: `1`) so secrets/config inputs apply before pod resources.
+
+## Migration note
+
+Readarr is effectively stagnant; plan migration to Bookshelf (preferred successor) or Lazylibrarian long term. The `bookshelf` chart should mirror key standards from this chart (database guardrails, ExternalSecrets, and documentation quality).
 
 ## Recommended resources
 
