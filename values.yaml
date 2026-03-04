@@ -1,10 +1,23 @@
 # Baseline Readarr. Override ingress host, persistence (existingClaim), postgresql (existingSecret), onepassworditem.items in your values.
+# Database mode for config.xml rendering is externalSecrets.configXml.database.
+# Defaults to sqlite (no Postgres block in config.xml) unless explicitly set.
+postgresqlOperator:
+  enabled: false
+  clusterName: readarr-postgresql
+  instances: 1
+  storageSize: 5Gi
+  storageClass: ""
+  bootstrap:
+    existingSecret: ""
+
 readarr:
   global:
     fullnameOverride: readarr
   controllers:
     main:
       enabled: true
+      annotations:
+        argocd.argoproj.io/sync-wave: "1"
       defaultContainerOptions:
         image:
           repository: linuxserver/readarr
@@ -94,6 +107,7 @@ readarr:
         - path: /downloads
 
 postgresql:
+  enabled: false
   architecture: standalone
   auth:
     database: readarr-main
@@ -107,6 +121,43 @@ postgresql:
       requests:
         cpu: "1"
         memory: 2Gi
+
+externalSecrets:
+  enabled: false
+  refreshInterval: 1h
+  secretStoreRef:
+    name: onepassword-connect
+    kind: ClusterSecretStore
+  configXml:
+    secretName: readarr
+    apiKeyRef:
+      key: readarr
+      property: api_key
+    database: sqlite # sqlite|bitnami|operator|external
+    postgres:
+      user: postgres
+      port: "5432"
+      host: ""
+      mainDb: readarr-main
+      logDb: readarr-log
+      credentialsRef:
+        key: readarr-postgresql-credentials
+        property: password
+    options:
+      logLevel: Info
+      port: "8787"
+      urlBase: ""
+      bindAddress: "*"
+      sslPort: "8787"
+      enableSsl: "False"
+      authenticationMethod: Basic
+      branch: nightly
+      launchBrowser: "False"
+      updateMechanism: Docker
+      analyticsEnabled: "False"
+      updateAutomatically: "True"
+      instanceName: Readarr
+    # additionalOptions: {} # map of extra <Key>Value</Key> elements to append into config.xml
 
 onepassworditem:
   enabled: true
